@@ -1,9 +1,11 @@
 package com.fetch.fetchit.ui.stickerbook
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,6 +41,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
 import com.fetch.fetchit.R
 import com.fetch.fetchit.utils.Constants
 
@@ -165,6 +171,7 @@ private fun Section(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun StickerItem(
     imageResId: Int,
@@ -176,28 +183,47 @@ private fun StickerItem(
             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.large, clip = false)
             .background(color = Color.White, shape = MaterialTheme.shapes.large)
     ) {
-        Box {
+        val gradient = Brush.linearGradient(
+            colors = listOf(Color(0xFFFD9C0C), Color(0xFFD27D04)),
+            start = Offset.Zero,
+            end = Offset.Infinite,
+        )
+
+        Box(
+            modifier = Modifier
+                .aspectRatio(1f)
+                .padding(8.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(brush = gradient),
+        ) {
             Image(
                 painter = painterResource(id = imageResId),
                 contentDescription = null,
-                modifier = Modifier.aspectRatio(1f),
+                modifier = Modifier.matchParentSize(),
                 contentScale = ContentScale.Crop,
             )
         }
-
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
+                .fillMaxWidth()
+                .padding(start= 8.dp, end = 8.dp, bottom = 8.dp),
         ) {
-            repeat(5) { idx ->
-                val filled = idx < starCount
-                Icon(
-                    imageVector = Icons.Rounded.Star,
-                    contentDescription = null,
-                    tint = if (filled) Color.Yellow else Color.Gray,
-                    modifier = Modifier.size(16.dp),
-                )
+            val starSpacing = 2.dp
+            val starSize = (maxWidth - starSpacing.times(4f)) / 5
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(starSpacing, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                repeat(5) { idx ->
+                    val filled = idx < starCount
+                    Icon(
+                        imageVector = Icons.Rounded.Star,
+                        contentDescription = null,
+                        tint = if (filled) Color.Yellow else Color.Gray,
+                        modifier = Modifier.size(starSize),
+                    )
+                }
             }
         }
     }
