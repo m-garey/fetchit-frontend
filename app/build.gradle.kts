@@ -10,11 +10,11 @@ plugins {
 apply(plugin = "com.google.dagger.hilt.android")
 
 android {
-    namespace = "com.example.mypointlingapp"
+    namespace = "com.fetch.fetchit"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.mypointlingapp"
+        applicationId = "com.fetch.fetchit"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
