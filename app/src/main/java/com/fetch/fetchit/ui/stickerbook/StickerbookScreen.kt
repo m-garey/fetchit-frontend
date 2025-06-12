@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fetch.fetchit.R
+import com.fetch.fetchit.feature.state.SectionUiState
 import com.fetch.fetchit.utils.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -197,13 +198,6 @@ fun StickerbookScreen(
         }
     }
 }
-
-private data class SectionUiState(
-    val title: String,
-    val storeType: String,
-    val stars: Int,
-    val imageResId: Int,
-)
 
 @Composable
 private fun Section(
