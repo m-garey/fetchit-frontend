@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -29,6 +31,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +57,31 @@ fun StickerbookScreen(
     state: StoreStarsUiState,
     onSubmit: (String) -> Unit = {},
 ) {
+
+    // State to track celebrated milestones to avoid duplicate pop-ups.
+    val celebrated = remember { mutableSetOf<String>() }
+
+    var sheetMessage by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Check for new milestones whenever the star state changes.
+    LaunchedEffect(state) {
+        val categories = listOf(
+            Constants.grocery.name to state.groceryStars,
+            Constants.hardware.name to state.hardwareStars,
+            Constants.restaurant.name to state.restaurantStars,
+        )
+
+        categories.forEach { (category, stars) ->
+            if (stars > 0 && stars % 5 == 0) {
+                val key = "$category-$stars"
+                if (celebrated.add(key)) {
+                    val catName = category.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                    sheetMessage = "Congratulations! You've earned $stars stars in $catName!"
+                }
+            }
+        }
+    }
     val sampleImages = listOf(
         R.mipmap.grocerystore_foreground,
         R.mipmap.hardwarestore_foreground,
@@ -78,8 +108,6 @@ fun StickerbookScreen(
             imageResId = sampleImages[2],
         ),
     )
-
-
 
     Scaffold(
         topBar = {
@@ -125,7 +153,27 @@ fun StickerbookScreen(
         }
     }
 
-    // Bottom sheet has been replaced by direct increment buttons, so no additional UI here.
+    if (sheetMessage != null) {
+        ModalBottomSheet(
+            onDismissRequest = { sheetMessage = null },
+            sheetState = sheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(text = "🎉", style = MaterialTheme.typography.displaySmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = sheetMessage!!, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { sheetMessage = null }) {
+                    Text("Awesome!")
+                }
+            }
+        }
+    }
 }
 
 private data class SectionUiState(
@@ -261,6 +309,6 @@ private fun StickerItem(
 @Composable
 private fun StickerbookPreview2() {
     StickerbookScreen(
-        state = StoreStarsUiState(groceryStars = 2, hardwareStars = 4, restaurantStars = 7),
+        state = StoreStarsUiState(groceryStars = 2, hardwareStars = 14, restaurantStars = 7),
     )
 }
