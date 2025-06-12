@@ -35,8 +35,6 @@ fun Section(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(text = state.title, style = MaterialTheme.typography.titleMedium)
-
         LazyRow(
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

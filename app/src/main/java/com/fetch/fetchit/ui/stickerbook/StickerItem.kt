@@ -41,7 +41,7 @@ fun StickerItem(
                 clip = false,
             )
             .background(
-                color = if (starCount > 0) Color.White else Color.LightGray,
+                color = Color.White,
                 shape = MaterialTheme.shapes.large,
             ),
     ) {
@@ -67,7 +67,7 @@ fun StickerItem(
             modifier = if (starCount > 0) {
                 boxBaseModifier.background(brush = gradient)
             } else {
-                boxBaseModifier
+                boxBaseModifier.background(Color.LightGray)
             },
         ) {
             if (starCount > 0) {
@@ -100,14 +100,12 @@ fun StickerItem(
                     val filled = idx < starCount
 
                     Box(modifier = Modifier.size(starSize)) {
-                        if (starCount > 0) {
-                            Icon(
-                                imageVector = Icons.Outlined.Star,
-                                contentDescription = null,
-                                tint = Color.DarkGray,
-                                modifier = Modifier.matchParentSize(),
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = Color.DarkGray,
+                            modifier = Modifier.matchParentSize(),
+                        )
 
                         Icon(
                             imageVector = Icons.Rounded.Star,
