@@ -164,7 +164,8 @@ private fun Section(
                 StickerItem(
                     imageResId = state.imageResId,
                     starCount = starCounts[index],
-                    modifier = Modifier.width(130.dp),
+                    position = index,
+                    modifier = Modifier.width(110.dp),
                 )
             }
         }
@@ -176,6 +177,7 @@ private fun Section(
 private fun StickerItem(
     imageResId: Int,
     starCount: Int,
+    position: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -183,8 +185,14 @@ private fun StickerItem(
             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.large, clip = false)
             .background(color = Color.White, shape = MaterialTheme.shapes.large)
     ) {
+        val gradientColors = when (position) {
+            0 -> listOf(Color(0xFFFD9C0C), Color(0xFFD27D04))
+            1 -> listOf(Color(0xFFDADDED), Color(0xFFCCCEDB))
+            else -> listOf(Color(0xFFFFED4E), Color(0xFFFFCD4E))
+        }
+
         val gradient = Brush.linearGradient(
-            colors = listOf(Color(0xFFFD9C0C), Color(0xFFD27D04)),
+            colors = gradientColors,
             start = Offset.Zero,
             end = Offset.Infinite,
         )
@@ -229,15 +237,7 @@ private fun StickerItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun StickerbookPreview() {
-    StickerbookScreen(
-        state = StoreStarsUiState(groceryStars = 2, hardwareStars = 4, restaurantStars = 7),
-    )
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 640)
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
 @Composable
 private fun StickerbookPreview2() {
     StickerbookScreen(
