@@ -181,9 +181,13 @@ fun StickerbookScreen(
                     )
                 }
                 Text(
-                    text = "Congratulations! You earned a $categoryCelebrated sticker!",
+                    text = "Nice! You earned a $categoryCelebrated sticker!",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 16.dp),
+                )
+                Text(
+                    text = "Great job collecting $starsCelebrated stars!",
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = { celebration = null }) {
