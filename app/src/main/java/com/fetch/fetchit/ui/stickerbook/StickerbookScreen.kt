@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,25 +29,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.fetch.fetchit.R
 import com.fetch.fetchit.utils.Constants
 
@@ -83,8 +79,7 @@ fun StickerbookScreen(
         ),
     )
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showSheet by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -104,10 +99,16 @@ fun StickerbookScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             ) {
-                Button(onClick = { showSheet = true }, shape = RoundedCornerShape(50)) {
-                    Text("Scan a receipt")
+                Button(onClick = { onSubmit(Constants.grocery.name) }, shape = RoundedCornerShape(50)) {
+                    Text("Grocery")
+                }
+                Button(onClick = { onSubmit(Constants.hardware.name) }, shape = RoundedCornerShape(50)) {
+                    Text("Hardware")
+                }
+                Button(onClick = { onSubmit(Constants.restaurant.name) }, shape = RoundedCornerShape(50)) {
+                    Text("Food")
                 }
             }
         },
@@ -124,16 +125,7 @@ fun StickerbookScreen(
         }
     }
 
-    if (showSheet) {
-        ReceiptScanBottomSheet(
-            onDismiss = { showSheet = false },
-            onSubmit = { store ->
-                showSheet = false
-                onSubmit(store)
-            },
-            sheetState = sheetState,
-        )
-    }
+    // Bottom sheet has been replaced by direct increment buttons, so no additional UI here.
 }
 
 private data class SectionUiState(
@@ -239,12 +231,26 @@ private fun StickerItem(
             ) {
                 repeat(5) { idx ->
                     val filled = idx < starCount
-                    Icon(
-                        imageVector = Icons.Rounded.Star,
-                        contentDescription = null,
-                        tint = if (filled) Color.Yellow else Color.Gray,
-                        modifier = Modifier.size(starSize),
-                    )
+                    Box(modifier = Modifier.size(starSize)) {
+                        // Draw stroke using an outlined star behind the filled/empty star
+                        if (starCount > 0) {
+                            Icon(
+                                imageVector = Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = Color.DarkGray,
+                                modifier = Modifier.matchParentSize(),
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.Rounded.Star,
+                            contentDescription = null,
+                            tint = if (filled) Color.Yellow else Color.LightGray,
+                            modifier = Modifier
+                                .matchParentSize()
+                                .padding(1.dp),
+                        )
+                    }
                 }
             }
         }
