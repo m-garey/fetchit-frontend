@@ -11,8 +11,11 @@ fun StickerbookRoute(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val celebrationEvent by viewModel.celebration.collectAsState(initial = null)
+
     StickerbookScreen(
         state = state,
         onSubmit = viewModel::onSubmit,
+        celebrationEvent = celebrationEvent,
     )
 }

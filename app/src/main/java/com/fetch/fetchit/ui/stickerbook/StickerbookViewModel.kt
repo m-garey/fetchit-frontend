@@ -3,6 +3,7 @@ package com.fetch.fetchit.ui.stickerbook
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fetch.fetchit.domain.usecase.GetStarsUseCase
+import com.fetch.fetchit.domain.usecase.IncrementResult
 import com.fetch.fetchit.domain.usecase.IncrementStarsUseCase
 import com.fetch.fetchit.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,6 +11,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +28,9 @@ class StickerbookViewModel @Inject constructor(
     getStarsUseCase: GetStarsUseCase,
     private val incrementStarsUseCase: IncrementStarsUseCase,
 ) : ViewModel() {
+
+    private val _celebration = MutableSharedFlow<Pair<String, Int>>()
+    val celebration = _celebration.asSharedFlow()
 
     val uiState: StateFlow<StoreStarsUiState> = combine(
         getStarsUseCase(Constants.grocery.name),
@@ -44,7 +50,10 @@ class StickerbookViewModel @Inject constructor(
 
     fun onSubmit(storeType: String) {
         viewModelScope.launch {
-            incrementStarsUseCase(storeType)
+            val result: IncrementResult = incrementStarsUseCase(storeType)
+            if (result.celebrate) {
+                _celebration.emit(storeType to result.newStars)
+            }
         }
     }
 }

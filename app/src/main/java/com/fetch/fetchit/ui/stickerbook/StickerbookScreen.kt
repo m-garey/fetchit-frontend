@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,30 +57,15 @@ import com.fetch.fetchit.utils.Constants
 fun StickerbookScreen(
     state: StoreStarsUiState,
     onSubmit: (String) -> Unit = {},
+    celebrationEvent: Pair<String, Int>? = null,
 ) {
 
-    // State to track celebrated milestones to avoid duplicate pop-ups.
-    val celebrated = remember { mutableSetOf<String>() }
-
-    var sheetMessage by remember { mutableStateOf<String?>(null) }
+    var celebration by remember { mutableStateOf<Pair<String, Int>?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Check for new milestones whenever the star state changes.
-    LaunchedEffect(state) {
-        val categories = listOf(
-            Constants.grocery.name to state.groceryStars,
-            Constants.hardware.name to state.hardwareStars,
-            Constants.restaurant.name to state.restaurantStars,
-        )
-
-        categories.forEach { (category, stars) ->
-            if (stars > 0 && stars % 5 == 0) {
-                val key = "$category-$stars"
-                if (celebrated.add(key)) {
-                    val catName = category.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-                    sheetMessage = "Congratulations! You've earned $stars stars in $catName!"
-                }
-            }
+    LaunchedEffect(celebrationEvent) {
+        if (celebrationEvent != null) {
+            celebration = celebrationEvent
         }
     }
     val sampleImages = listOf(
@@ -153,9 +139,24 @@ fun StickerbookScreen(
         }
     }
 
-    if (sheetMessage != null) {
+    if (celebration != null) {
+        val (categoryCelebrated, starsCelebrated) = celebration!!
+
+        val medallionRes = when (starsCelebrated) {
+            5 -> R.drawable.bronze
+            10 -> R.drawable.silver
+            15 -> R.drawable.gold
+            else -> R.drawable.bronze
+        }
+
+        val logoRes = when (categoryCelebrated) {
+            Constants.grocery.name -> R.mipmap.grocerystore_foreground
+            Constants.hardware.name -> R.mipmap.hardwarestore_foreground
+            else -> R.mipmap.restaurant_foreground
+        }
+
         ModalBottomSheet(
-            onDismissRequest = { sheetMessage = null },
+            onDismissRequest = { celebration = null },
             sheetState = sheetState,
         ) {
             Column(
@@ -164,11 +165,28 @@ fun StickerbookScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = "🎉", style = MaterialTheme.typography.displaySmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = sheetMessage!!, style = MaterialTheme.typography.bodyLarge)
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(id = medallionRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(180.dp),
+                        contentScale = ContentScale.Fit,
+                    )
+
+                    Image(
+                        painter = painterResource(id = logoRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(185.dp).offset(y = 3.dp, x = (-1).dp),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+                Text(
+                    text = "Congratulations! You earned a $categoryCelebrated sticker!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { sheetMessage = null }) {
+                Button(onClick = { celebration = null }) {
                     Text("Awesome!")
                 }
             }
