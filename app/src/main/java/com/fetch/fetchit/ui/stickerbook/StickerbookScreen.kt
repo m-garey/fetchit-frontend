@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import com.fetch.fetchit.R
 import com.fetch.fetchit.utils.Constants
 
@@ -88,7 +90,12 @@ fun StickerbookScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = "Stickerbook", fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                    Text(
+                        text = "Stickerbook",
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
                 },
             )
         },
@@ -183,7 +190,7 @@ private fun StickerItem(
     Column(
         modifier = modifier
             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.large, clip = false)
-            .background(color = Color.White, shape = MaterialTheme.shapes.large)
+            .background(color = if (starCount > 0) Color.White else Color.LightGray, shape = MaterialTheme.shapes.large)
     ) {
         val gradientColors = when (position) {
             0 -> listOf(Color(0xFFFD9C0C), Color(0xFFD27D04))
@@ -197,19 +204,26 @@ private fun StickerItem(
             end = Offset.Infinite,
         )
 
+        val boxBaseModifier = Modifier
+            .aspectRatio(1f)
+            .padding(8.dp)
+            .clip(MaterialTheme.shapes.medium)
+
         Box(
-            modifier = Modifier
-                .aspectRatio(1f)
-                .padding(8.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(brush = gradient),
+            modifier = if (starCount > 0) {
+                boxBaseModifier.background(brush = gradient)
+            } else {
+                boxBaseModifier
+            },
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = null,
-                modifier = Modifier.matchParentSize(),
-                contentScale = ContentScale.Crop,
-            )
+            if (starCount > 0) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = null,
+                    modifier = Modifier.matchParentSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         }
         BoxWithConstraints(
             modifier = Modifier
