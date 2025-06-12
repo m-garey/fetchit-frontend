@@ -1,48 +1,36 @@
 package com.fetch.fetchit.ui.stickerbook
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -63,17 +51,17 @@ fun StickerbookScreen(
 
     var celebration by remember { mutableStateOf<Pair<String, Int>?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sampleImages = listOf(
+        R.mipmap.grocerystore_foreground,
+        R.mipmap.hardwarestore_foreground,
+        R.mipmap.restaurant_foreground,
+    )
 
     LaunchedEffect(celebrationEvent) {
         if (celebrationEvent != null) {
             celebration = celebrationEvent
         }
     }
-    val sampleImages = listOf(
-        R.mipmap.grocerystore_foreground,
-        R.mipmap.hardwarestore_foreground,
-        R.mipmap.restaurant_foreground,
-    )
 
     val sections = listOf(
         SectionUiState(
@@ -97,36 +85,8 @@ fun StickerbookScreen(
     )
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Stickerbook",
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
-                },
-            )
-        },
-        bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-            ) {
-                Button(onClick = { onSubmit(Constants.grocery.name) }, shape = RoundedCornerShape(50)) {
-                    Text("Grocery")
-                }
-                Button(onClick = { onSubmit(Constants.hardware.name) }, shape = RoundedCornerShape(50)) {
-                    Text("Hardware")
-                }
-                Button(onClick = { onSubmit(Constants.restaurant.name) }, shape = RoundedCornerShape(50)) {
-                    Text("Food")
-                }
-            }
-        },
+        topBar = { StickerbookTopBar() },
+        bottomBar = { StickerbookBottomBar(onSubmit = onSubmit) },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -177,7 +137,9 @@ fun StickerbookScreen(
                     Image(
                         painter = painterResource(id = logoRes),
                         contentDescription = null,
-                        modifier = Modifier.size(185.dp).offset(y = 3.dp, x = (-1).dp),
+                        modifier = Modifier
+                            .size(185.dp)
+                            .offset(y = 3.dp, x = (-1).dp),
                         contentScale = ContentScale.Fit,
                     )
                 }
@@ -199,6 +161,40 @@ fun StickerbookScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StickerbookTopBar() {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = "Stickerbook",
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.ExtraBold,
+            )
+        },
+    )
+}
+
+@Composable
+fun StickerbookBottomBar(onSubmit: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+    ) {
+        Button(onClick = { onSubmit(Constants.grocery.name) }, shape = RoundedCornerShape(50)) {
+            Text("Grocery")
+        }
+        Button(onClick = { onSubmit(Constants.hardware.name) }, shape = RoundedCornerShape(50)) {
+            Text("Hardware")
+        }
+        Button(onClick = { onSubmit(Constants.restaurant.name) }, shape = RoundedCornerShape(50)) {
+            Text("Food")
+        }
+    }
+}
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 800)
 @Composable
