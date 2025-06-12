@@ -26,7 +26,7 @@ class StickerbookViewModel @Inject constructor(
     private val incrementStarsUseCase: IncrementStarsUseCase,
 ) : ViewModel() {
 
-    val uiState: StateFlow<StoreStarsUiState> = kotlinx.coroutines.flow.combine(
+    val uiState: StateFlow<StoreStarsUiState> = combine(
         getStarsUseCase(Constants.grocery.name),
         getStarsUseCase(Constants.hardware.name),
         getStarsUseCase(Constants.restaurant.name),
