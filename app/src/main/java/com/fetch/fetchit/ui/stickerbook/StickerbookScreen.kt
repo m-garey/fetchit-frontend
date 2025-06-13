@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.fetch.fetchit.R
 import com.fetch.fetchit.feature.state.SectionUiState
 import com.fetch.fetchit.utils.Constants
@@ -51,7 +52,8 @@ fun StickerbookScreen(
 ) {
 
     var celebration by remember { mutableStateOf<Pair<String, Int>?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showFirstStarSheet by remember { mutableStateOf(false) }
+    var firstStarShown by remember { mutableStateOf(false) }
     val sampleImages = listOf(
         R.mipmap.grocerystore_foreground,
         R.mipmap.hardwarestore_foreground,
@@ -61,6 +63,16 @@ fun StickerbookScreen(
     LaunchedEffect(celebrationEvent) {
         if (celebrationEvent != null) {
             celebration = celebrationEvent
+        }
+    }
+
+    // Detect first star earned and trigger celebratory sheet once
+    val totalStars = state.groceryStars + state.hardwareStars + state.restaurantStars
+
+    LaunchedEffect(totalStars) {
+        if (totalStars == 1 && !firstStarShown) {
+            showFirstStarSheet = true
+            firstStarShown = true
         }
     }
 
@@ -95,13 +107,25 @@ fun StickerbookScreen(
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(sections) { section ->
-                Section(section)
+            items(sections) {
+                Section(it)
             }
         }
     }
 
-    if (celebration != null) {
+    if (showFirstStarSheet) {
+        CelebrationBottomSheet(
+            onDismiss = { showFirstStarSheet = false },
+            title = "Congratulations! You earned your first star!",
+            subtitle = "Get four more to get a bronze sticker",
+            topContent = {
+                Text(
+                    text = "🌟",
+                    fontSize = 96.sp,
+                )
+            },
+        )
+    } else if (celebration != null) {
         val (categoryCelebrated, starsCelebrated) = celebration!!
 
         val medallionRes = when (starsCelebrated) {
@@ -117,16 +141,11 @@ fun StickerbookScreen(
             else -> R.mipmap.restaurant_foreground
         }
 
-        ModalBottomSheet(
-            onDismissRequest = { celebration = null },
-            sheetState = sheetState,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        CelebrationBottomSheet(
+            onDismiss = { celebration = null },
+            title = "Nice! You earned a $categoryCelebrated sticker!",
+            subtitle = "Great job collecting $starsCelebrated stars!",
+            topContent = {
                 Box(contentAlignment = Alignment.Center) {
                     Image(
                         painter = painterResource(id = medallionRes),
@@ -144,21 +163,8 @@ fun StickerbookScreen(
                         contentScale = ContentScale.Fit,
                     )
                 }
-                Text(
-                    text = "Nice! You earned a $categoryCelebrated sticker!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-                Text(
-                    text = "Great job collecting $starsCelebrated stars!",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { celebration = null }) {
-                    Text("Awesome!")
-                }
-            }
-        }
+            },
+        )
     }
 }
 
@@ -194,6 +200,52 @@ fun StickerbookBottomBar(onSubmit: (String) -> Unit) {
         }
         Button(onClick = { onSubmit(Constants.restaurant.name) }, shape = RoundedCornerShape(50)) {
             Text("Food")
+        }
+    }
+}
+
+// Reusable bottom-sheet composable for sticker / star celebrations
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CelebrationBottomSheet(
+    onDismiss: () -> Unit,
+    title: String,
+    subtitle: String,
+    topContent: @Composable () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            topContent()
+
+            if (title.isNotBlank()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+            }
+
+            if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onDismiss) {
+                Text("Awesome!")
+            }
         }
     }
 }
