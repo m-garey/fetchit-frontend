@@ -1,6 +1,7 @@
 package com.fetch.fetchit.ui.stickerbook
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,16 +12,20 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 
 /**
  * Individual sticker item displaying an image with gradient background and star rating.
@@ -86,7 +91,7 @@ fun StickerItem(
                 .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
         ) {
             val starSpacing = 2.dp
-            val starSize = (maxWidth - starSpacing.times(4f)) / 5
+            val starSize = (maxWidth - starSpacing.times(3f)) / 5
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -100,20 +105,34 @@ fun StickerItem(
                     val filled = idx < starCount
 
                     Box(modifier = Modifier.size(starSize)) {
+                        // Outline/background star that is always visible
                         Icon(
                             imageVector = Icons.Outlined.Star,
                             contentDescription = null,
-                            tint = Color.DarkGray,
+                            tint = Color.LightGray,
                             modifier = Modifier.matchParentSize(),
+                        )
+
+                        // Filled star that animates in/out based on the filled state
+                        val targetScale = if (filled) 1f else 0f
+                        val scale by animateFloatAsState(
+                            targetValue = targetScale,
+                            animationSpec = tween(durationMillis = 250, easing = EaseInElastic),
+                            label = "starScaleAnimation",
                         )
 
                         Icon(
                             imageVector = Icons.Rounded.Star,
                             contentDescription = null,
-                            tint = if (filled) Color.Yellow else Color.LightGray,
+                            tint = Color.Yellow,
                             modifier = Modifier
                                 .matchParentSize()
-                                .padding(1.dp),
+                                .padding(1.dp)
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                    alpha = scale
+                                },
                         )
                     }
                 }
